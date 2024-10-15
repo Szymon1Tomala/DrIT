@@ -8,6 +8,7 @@ using Soneta.Kadry;
 using Soneta.KadryPlace;
 using Soneta.Types;
 using Rekrutacja.Workers.Template;
+using static Soneta.Business.FieldValue;
 
 //Rejetracja Workera - Pierwszy TypeOf określa jakiego typu ma być wyświetlany Worker, Drugi parametr wskazuje na jakim Typie obiektów będzie wyświetlany Worker
 [assembly: Worker(typeof(TemplateWorker), typeof(Pracownicy))]
@@ -20,6 +21,16 @@ namespace Rekrutacja.Workers.Template
         {
             [Caption("Data obliczeń")]
             public Date DataObliczen { get; set; }
+
+            [Caption("A")]
+            public double A { get; set; }
+
+            [Caption("B")]
+            public double B { get; set; }
+
+            [Caption("Operacja")]
+            public char OperationSign { get; set; }
+
             public TemplateWorkerParametry(Context context) : base(context)
             {
                 this.DataObliczen = Date.Today;
@@ -45,27 +56,67 @@ namespace Rekrutacja.Workers.Template
             DebuggerSession.MarkLineAsBreakPoint();
             //Pobieranie danych z Contextu
             Pracownik pracownik = null;
+
+            var parameters = (TemplateWorkerParametry)this.Cx[typeof(TemplateWorkerParametry)];
+
+            ValidateParameters(parameters);
+            var result = PerformOperation(parameters);
+
             if (this.Cx.Contains(typeof(Pracownik)))
             {
                 pracownik = (Pracownik)this.Cx[typeof(Pracownik)];
             }
 
+
             //Modyfikacja danych
             //Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
             using (Session nowaSesja = this.Cx.Login.CreateSession(false, false, "ModyfikacjaPracownika"))
             {
+                
                 //Otwieramy Transaction aby można było edytować obiekt z sesji
                 using (ITransaction trans = nowaSesja.Logout(true))
                 {
                     //Pobieramy obiekt z Nowo utworzonej sesji
-                    var pracownikZSesja = nowaSesja.Get(pracownik);
+                    //var pracownikZSesja = nowaSesja.Get(pracownik);
                     //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
-                    pracownikZSesja.Features["DataObliczen"] = this.Parametry.DataObliczen;
+                    //pracownikZSesja.Features["DataObliczen"] = this.Parametry.DataObliczen;
                     //Zatwierdzamy zmiany wykonane w sesji
                     trans.CommitUI();
                 }
                 //Zapisujemy zmiany
                 nowaSesja.Save();
+            }
+        }
+
+        private void ValidateParameters(TemplateWorkerParametry parameters)
+        {
+            char[] allowedOperationSigns = { '+', '-', '*', '/' };
+
+            if (allowedOperationSigns.Contains(parameters.OperationSign) is false)
+            {
+                throw new ArgumentException($"Only listed characters are allowed for operation sign: {allowedOperationSigns}");
+            }
+
+            if (parameters.OperationSign == '/' && parameters.B == 0)
+            {
+                throw new ArgumentException("It's not allowed to divide by 0");
+            }
+        }
+
+        private double PerformOperation(TemplateWorkerParametry parameters)
+        {
+            switch (parameters.OperationSign)
+            {
+                case '+':
+                    return parameters.A + parameters.B;
+                case '-':
+                    return parameters.A - parameters.B;
+                case '*':
+                    return parameters.A * parameters.B;
+                case '/':
+                    return parameters.A / parameters.B;
+                default:
+                    return 0;
             }
         }
     }
