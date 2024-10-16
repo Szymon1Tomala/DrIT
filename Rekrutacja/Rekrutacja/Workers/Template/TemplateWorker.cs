@@ -18,12 +18,13 @@ namespace Rekrutacja.Workers.Template
         //Aby parametry działały prawidłowo dziedziczymy po klasie ContextBase
         public class TemplateWorkerParametry : ContextBase
         {
-            [Caption("Data obliczeń")]
-            public Date DataObliczen { get; set; }
-            public TemplateWorkerParametry(Context context) : base(context)
-            {
-                this.DataObliczen = Date.Today;
-            }
+            [Caption("A")]
+            public string A { get; set; }
+
+            [Caption("B")]
+            public string B { get; set; }
+
+            public TemplateWorkerParametry(Context context) : base(context) { }
         }
         //Obiekt Context jest to pudełko które przechowuje Typy danych, aktualnie załadowane w aplikacji
         //Atrybut Context pobiera z "Contextu" obiekty które aktualnie widzimy na ekranie
@@ -44,11 +45,9 @@ namespace Rekrutacja.Workers.Template
             //Włączenie Debug, aby działał należy wygenerować DLL w trybie DEBUG
             DebuggerSession.MarkLineAsBreakPoint();
             //Pobieranie danych z Contextu
-            Pracownik pracownik = null;
-            if (this.Cx.Contains(typeof(Pracownik)))
-            {
-                pracownik = (Pracownik)this.Cx[typeof(Pracownik)];
-            }
+
+            var parameters = this.Parametry;
+            var result = Parse(parameters.A, parameters.B);
 
             //Modyfikacja danych
             //Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
@@ -60,13 +59,18 @@ namespace Rekrutacja.Workers.Template
                     //Pobieramy obiekt z Nowo utworzonej sesji
                     var pracownikZSesja = nowaSesja.Get(pracownik);
                     //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
-                    pracownikZSesja.Features["DataObliczen"] = this.Parametry.DataObliczen;
+                    pracownikZSesja.Features["Wynik"] = ;
                     //Zatwierdzamy zmiany wykonane w sesji
                     trans.CommitUI();
                 }
                 //Zapisujemy zmiany
                 nowaSesja.Save();
             }
+        }
+
+        private object Parse(string a, string b)
+        {
+            throw new NotImplementedException();
         }
     }
 }
