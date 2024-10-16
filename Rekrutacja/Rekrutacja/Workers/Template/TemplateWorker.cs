@@ -69,10 +69,5 @@ namespace Rekrutacja.Workers.Template
                 nowaSesja.Save();
             }
         }
-
-        private object Parse(string a, string b)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
