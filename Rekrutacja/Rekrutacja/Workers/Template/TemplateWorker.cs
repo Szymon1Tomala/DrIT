@@ -51,8 +51,6 @@ namespace Rekrutacja.Workers.Template
             //Włączenie Debug, aby działał należy wygenerować DLL w trybie DEBUG
             DebuggerSession.MarkLineAsBreakPoint();
             //Pobieranie danych z Contextu
-            Pracownik pracownik = null;
-
             var parameters = this.Parametry;
             var employees = (IEnumerable<Pracownik>)this.Cx[typeof(IEnumerable<Pracownik>)];
 
@@ -68,10 +66,6 @@ namespace Rekrutacja.Workers.Template
                 //Otwieramy Transaction aby można było edytować obiekt z sesji
                 using (ITransaction trans = nowaSesja.Logout(true))
                 {
-                    //Pobieramy obiekt z Nowo utworzonej sesji
-                    var pracownikZSesja = nowaSesja.Get(pracownik);
-                    //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
-
                     foreach (var employee in employees)
                     {
                         var employeeFromSession = nowaSesja.Get(employee);
