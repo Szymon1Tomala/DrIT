@@ -76,24 +76,3 @@ namespace Rekrutacja.Workers.Template
         }
     }
 }
-
-var employees = (IEnumerable<Pracownik>)this.Cx[typeof(IEnumerable<Pracownik>)];
-
-ValidateParameters(parameters);
-var operationResult = Calculator.Calculator
-    .PerformOperation(parameters.A, parameters.B, GetArithmeticOperationFromChar(parameters.OperationSign));
-
-//Modyfikacja danych
-//Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
-using (Session nowaSesja = this.Cx.Login.CreateSession(false, false, "ModyfikacjaPracownika"))
-{
-    //Otwieramy Transaction aby można było edytować obiekt z sesji
-    using (ITransaction trans = nowaSesja.Logout(true))
-    {
-        foreach (var employee in employees)
-        {
-            var employeeFromSession = nowaSesja.Get(employee);
-
-            employeeFromSession.Features["DataObliczen"] = parameters.DataObliczen;
-            employeeFromSession.Features["Wynik"] = operationResult;
-        }
