@@ -12,7 +12,7 @@ namespace Rekrutacja.Calculator
 
     public static class Calculator 
     {
-        public static double PerformOperation(double firstNumber, double secondNumber, ArithmeticOperation operation)
+        public static double PerformOperation(int firstNumber, int secondNumber, ArithmeticOperation operation)
         {
 
             if (Enum.IsDefined(typeof(ArithmeticOperation), (int)operation) is false)
@@ -22,7 +22,7 @@ namespace Rekrutacja.Calculator
 
             if (operation is ArithmeticOperation.Division && secondNumber == 0)
             {
-                throw new ArgumentException("It's not allowed to divide by 0.");
+                throw new InvalidOperationException("It's not allowed to divide by 0.");
             }
 
             switch (operation)

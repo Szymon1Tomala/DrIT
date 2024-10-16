@@ -23,10 +23,10 @@ namespace Rekrutacja.Workers.Template
             public Date DataObliczen { get; set; }
 
             [Caption("A")]
-            public double A { get; set; }
+            public int A { get; set; }
 
             [Caption("B")]
-            public double B { get; set; }
+            public int B { get; set; }
 
             [Caption("Operacja")]
             public char OperationSign { get; set; }
