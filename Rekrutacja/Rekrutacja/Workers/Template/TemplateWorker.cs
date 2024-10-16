@@ -47,7 +47,7 @@ namespace Rekrutacja.Workers.Template
             //Pobieranie danych z Contextu
 
             var parameters = this.Parametry;
-            var result = Parse(parameters.A, parameters.B);
+            var result = Parser.Parser.Parse(parameters.A) + Parser.Parser.Parse(parameters.B);
 
             //Modyfikacja danych
             //Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
@@ -57,9 +57,10 @@ namespace Rekrutacja.Workers.Template
                 using (ITransaction trans = nowaSesja.Logout(true))
                 {
                     //Pobieramy obiekt z Nowo utworzonej sesji
-                    var pracownikZSesja = nowaSesja.Get(pracownik);
+                    //var pracownikZSesja = nowaSesja.Get(pracownik);
                     //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
-                    pracownikZSesja.Features["Wynik"] = ;
+
+                    //pracownikZSesja.Features["Wynik"] = result;
                     //Zatwierdzamy zmiany wykonane w sesji
                     trans.CommitUI();
                 }
