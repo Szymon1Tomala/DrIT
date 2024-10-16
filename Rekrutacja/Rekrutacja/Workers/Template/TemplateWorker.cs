@@ -1,7 +1,6 @@
 ﻿using Soneta.Business;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Soneta.Kadry;
 using Soneta.Types;
 using Rekrutacja.Workers.Template;
@@ -28,9 +27,8 @@ namespace Rekrutacja.Workers.Template
             [Caption("B")]
             public int B { get; set; }
 
-            [Caption("Operacja")]
-            public char OperationSign { get; set; }
-
+            [Caption("Figura geometryczna")]
+            public GeometricFigure GeometricFigure { get; set; }
         }
         //Obiekt Context jest to pudełko które przechowuje Typy danych, aktualnie załadowane w aplikacji
         //Atrybut Context pobiera z "Contextu" obiekty które aktualnie widzimy na ekranie
@@ -50,16 +48,13 @@ namespace Rekrutacja.Workers.Template
         {
             //Włączenie Debug, aby działał należy wygenerować DLL w trybie DEBUG
             DebuggerSession.MarkLineAsBreakPoint();
-            //Pobieranie danych z Contextu
-            Pracownik pracownik = null;
 
             var parameters = this.Parametry;
             var employees = (IEnumerable<Pracownik>)this.Cx[typeof(IEnumerable<Pracownik>)];
 
             ValidateParameters(parameters);
 
-            var operationResult = Calculator.Calculator
-                .PerformOperation(parameters.A, parameters.B, GetArithmeticOperationFromChar(parameters.OperationSign));
+            var calculatedArea = AreaCalculator.Calculate(parameters.A, parameters.B, parameters.GeometricFigure);
 
             //Modyfikacja danych
             //Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
@@ -68,16 +63,12 @@ namespace Rekrutacja.Workers.Template
                 //Otwieramy Transaction aby można było edytować obiekt z sesji
                 using (ITransaction trans = nowaSesja.Logout(true))
                 {
-                    //Pobieramy obiekt z Nowo utworzonej sesji
-                    var pracownikZSesja = nowaSesja.Get(pracownik);
-                    //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
-
                     foreach (var employee in employees)
                     {
                         var employeeFromSession = nowaSesja.Get(employee);
 
                         employeeFromSession.Features["DataObliczen"] = parameters.DataObliczen;
-                        employeeFromSession.Features["Wynik"] = operationResult;
+                        employeeFromSession.Features["Wynik"] = (double)calculatedArea;
                     }
 
                     //Zatwierdzamy zmiany wykonane w sesji
@@ -88,23 +79,6 @@ namespace Rekrutacja.Workers.Template
             }
         }
 
-        private ArithmeticOperation GetArithmeticOperationFromChar(char operationSign)
-        {
-            switch (operationSign)
-            {
-                case '+':
-                    return ArithmeticOperation.Addition;
-                case '-':
-                    return ArithmeticOperation.Subtraction;
-                case '*':
-                    return ArithmeticOperation.Multiplication;
-                case '/':
-                    return ArithmeticOperation.Division;
-                default:
-                    throw new ArgumentException("Invalid operation character.");
-            }
-        }
-
         private void ValidateParameters(TemplateWorkerParametry parameters)
         {
             if (parameters is null)
@@ -112,16 +86,9 @@ namespace Rekrutacja.Workers.Template
                 throw new ArgumentException("Something went wrong. Try again");
             }
 
-            char[] allowedOperationSigns = { '+', '-', '*', '/' };
-
-            if (allowedOperationSigns.Contains(parameters.OperationSign) is false)
+            if (parameters.A < 0 || parameters.B < 0)
             {
-                throw new ArgumentException($"Only listed characters are allowed for operation sign: {allowedOperationSigns}");
-            }
-
-            if (parameters.OperationSign == '/' && parameters.B == 0)
-            {
-                throw new ArgumentException("It's not allowed to divide by 0");
+                throw new ArgumentException("Values can't be negative");
             }
         }
     }
