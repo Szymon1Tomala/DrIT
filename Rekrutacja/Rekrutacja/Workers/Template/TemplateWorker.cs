@@ -1,11 +1,7 @@
 ﻿using Soneta.Business;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Soneta.Kadry;
-using Soneta.KadryPlace;
 using Soneta.Types;
 using Rekrutacja.Workers.Template;
 
@@ -49,6 +45,8 @@ namespace Rekrutacja.Workers.Template
             var parameters = this.Parametry;
             var result = Parser.Parser.Parse(parameters.A) + Parser.Parser.Parse(parameters.B);
 
+            var employees = (IEnumerable<Pracownik>)this.Cx[typeof(IEnumerable<Pracownik>)];
+
             //Modyfikacja danych
             //Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
             using (Session nowaSesja = this.Cx.Login.CreateSession(false, false, "ModyfikacjaPracownika"))
@@ -56,11 +54,14 @@ namespace Rekrutacja.Workers.Template
                 //Otwieramy Transaction aby można było edytować obiekt z sesji
                 using (ITransaction trans = nowaSesja.Logout(true))
                 {
-                    //Pobieramy obiekt z Nowo utworzonej sesji
-                    //var pracownikZSesja = nowaSesja.Get(pracownik);
-                    //Features - są to pola rozszerzające obiekty w bazie danych, dzięki czemu nie jestesmy ogarniczeni to kolumn jakie zostały utworzone przez producenta
+                    foreach (var employee in employees)
+                    {
+                        var employeeFromSession = nowaSesja.Get(employee);
 
-                    //pracownikZSesja.Features["Wynik"] = result;
+                        employeeFromSession.Features["DataObliczen"] = Date.Today.ToString();
+                        employeeFromSession.Features["Wynik"] = result;
+                    }
+
                     //Zatwierdzamy zmiany wykonane w sesji
                     trans.CommitUI();
                 }
@@ -75,3 +76,24 @@ namespace Rekrutacja.Workers.Template
         }
     }
 }
+
+var employees = (IEnumerable<Pracownik>)this.Cx[typeof(IEnumerable<Pracownik>)];
+
+ValidateParameters(parameters);
+var operationResult = Calculator.Calculator
+    .PerformOperation(parameters.A, parameters.B, GetArithmeticOperationFromChar(parameters.OperationSign));
+
+//Modyfikacja danych
+//Aby modyfikować dane musimy mieć otwartą sesję, któa nie jest read only
+using (Session nowaSesja = this.Cx.Login.CreateSession(false, false, "ModyfikacjaPracownika"))
+{
+    //Otwieramy Transaction aby można było edytować obiekt z sesji
+    using (ITransaction trans = nowaSesja.Logout(true))
+    {
+        foreach (var employee in employees)
+        {
+            var employeeFromSession = nowaSesja.Get(employee);
+
+            employeeFromSession.Features["DataObliczen"] = parameters.DataObliczen;
+            employeeFromSession.Features["Wynik"] = operationResult;
+        }
