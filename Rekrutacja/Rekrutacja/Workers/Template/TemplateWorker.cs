@@ -5,7 +5,6 @@ using Soneta.Kadry;
 using Soneta.Types;
 using Rekrutacja.Workers.Template;
 using Rekrutacja.Calculator;
-//using static Soneta.Business.FieldValue;
 
 //Rejetracja Workera - Pierwszy TypeOf określa jakiego typu ma być wyświetlany Worker, Drugi parametr wskazuje na jakim Typie obiektów będzie wyświetlany Worker
 [assembly: Worker(typeof(TemplateWorker), typeof(Pracownicy))]
