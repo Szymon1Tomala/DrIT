@@ -58,8 +58,8 @@ namespace Rekrutacja.Workers.Template
                     {
                         var employeeFromSession = nowaSesja.Get(employee);
 
-                        employeeFromSession.Features["DataObliczen"] = Date.Today.ToString();
-                        employeeFromSession.Features["Wynik"] = result;
+                        employeeFromSession.Features["DataObliczen"] = Date.Today;
+                        employeeFromSession.Features["Wynik"] = (double)result;
                     }
 
                     //Zatwierdzamy zmiany wykonane w sesji
