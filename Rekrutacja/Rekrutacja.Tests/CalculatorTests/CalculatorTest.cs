@@ -63,7 +63,7 @@ namespace Rekrutacja.Tests.CalculatorTests
         [TestCase(-92, -3, GeometricFigure.Rectangle)]
         [TestCase(7, -5, GeometricFigure.Triangle)]
         [TestCase(4, -13, GeometricFigure.Triangle)]
-        public void Calculate_InvalidFigure_ThrowsException(int firstNumber, int secondNumber, GeometricFigure figure)
+        public void Calculate_InvalidInput_ThrowsException(int firstNumber, int secondNumber, GeometricFigure figure)
         {
             // Act & Assert
             Assert.Throws<ArgumentException>(() =>
